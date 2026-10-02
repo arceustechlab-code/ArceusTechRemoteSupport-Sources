@@ -1,0 +1,48 @@
+name: Verify public source download
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/verify-source.yml']
+permissions:
+  contents: read
+jobs:
+  anonymous-download:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Download published source and manifest without authentication
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_BASE='https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/source-snapshot-2ba909e'
+          curl --fail --location --proto '=https' --tlsv1.2 --retry 2 "$SOURCE_BASE/source-snapshot-2ba909e.tar.gz" --output source.tar.gz
+          curl --fail --location --proto '=https' --tlsv1.2 --retry 2 "$SOURCE_BASE/source-snapshot-2ba909e.tar.gz.manifest.json" --output manifest.json
+      - name: Verify source checksum and all archived files
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, tarfile
+          from pathlib import Path
+          archive = Path('source.tar.gz')
+          expected = '0580470596327e6496d5d4451a90a24197cf6c736468bd8e20d0eba2d8526c11'
+          if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+              raise SystemExit('Archive checksum mismatch')
+          manifest = json.loads(Path('manifest.json').read_text())
+          with tarfile.open(archive) as source:
+              files = [member for member in source.getmembers() if member.isfile()]
+              if len(files) != len(manifest) or len(files) != 1103:
+                  raise SystemExit('Unexpected manifest/archive file count')
+              seen = set()
+              for member in files:
+                  prefix = 'ArceusTechRemoteSupport/'
+                  if not member.name.startswith(prefix):
+                      raise SystemExit('Unexpected archive path')
+                  name = member.name[len(prefix):]
+                  if name in seen or name not in manifest:
+                      raise SystemExit('Unexpected or duplicate file')
+                  seen.add(name)
+                  data = source.extractfile(member).read()
+                  if hashlib.sha256(data).hexdigest() != manifest[name]:
+                      raise SystemExit('Manifest mismatch: ' + name)
+          print('PASS: anonymous HTTPS downloads, expected source SHA256, all 1103 files match manifest')
+          PY
