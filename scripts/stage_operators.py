@@ -1,22 +1,21 @@
 """Stage current operator packages under clean filenames in a private draft only."""
 import json
 import subprocess
+import struct
+import zipfile
 import time
 from pathlib import Path
 from publish_clients import REPO, RUN, DRAFT, api, digest, download, validate_source, validate_binary
 
 TAG = 'operator-2026.10.03-494d39c'
 BASE = 'ArceusTechRemoteSupportOperator'
-ASSET_PLATFORM_ALIASES = {'macos-x86_64': 'macos-x64'}
+ASSET_PLATFORM_ALIASES = {'macos-x86_64': 'macos-x64', 'windows-x64': 'windows-x64-licensefix', 'windows-x86': 'windows-x86-licensefix'}
 PACKAGES = {
     'windows-x64': ['-Setup.exe', '-Windows-x64.zip'],
     'windows-x86': ['-Windows-x86-Setup.exe', '-Windows-x86.zip'],
     'macos-arm64': ['-macOS-arm64.dmg', '-macOS-arm64.app.zip'],
     'macos-x86_64': ['-macOS-x86_64.dmg', '-macOS-x86_64.app.zip'],
 }
-# Stage only unchanged Mac operators while Windows remediation builds.
-PACKAGES.pop('windows-x64')
-PACKAGES.pop('windows-x86')
 
 
 def main():
@@ -29,6 +28,15 @@ def main():
             break
         assert time.monotonic() < deadline, 'Native build still in progress'
         print('Waiting for existing operator native builds', flush=True)
+        time.sleep(30)
+    while True:
+        windows = api('actions/runs/37115254879')
+        assert windows['head_sha'] == '2fb14423c0af98444380ddb54615e17edd9c958d'
+        if windows['status'] == 'completed':
+            assert windows['conclusion'] == 'success', 'Remediated Windows builds must succeed'
+            break
+        assert time.monotonic() < deadline, 'Windows builds still in progress'
+        print('Waiting for existing Windows operator native builds', flush=True)
         time.sleep(30)
     internal = api(f'releases/{DRAFT}')
     assert internal['draft'], 'Candidate release must remain private'
@@ -53,6 +61,19 @@ def main():
             validate_source(folder / source, json.loads((folder / (source + '.manifest.json')).read_text()), role='operator')
         if platform.startswith('macos'):
             validate_binary(folder / (BASE + suffixes[1]), platform)
+        elif platform == 'windows-x64':
+            with zipfile.ZipFile(folder / (BASE + suffixes[1])) as bundle:
+                assert bundle.testzip() is None, 'Corrupt Windows operator ZIP'
+                assert not any('sciter' in name.lower() for name in bundle.namelist())
+                executable = [name for name in bundle.namelist() if name == BASE + '.exe' or name.endswith('/' + BASE + '.exe')]
+                assert len(executable) == 1, 'Operator executable missing or ambiguous'
+                with bundle.open(executable[0]) as stream:
+                    header = stream.read(4096)
+                assert header[:2] == b'MZ'
+                offset = struct.unpack_from('<I', header, 0x3c)[0]
+                assert header[offset:offset+4] == b'PE\0\0'
+                assert struct.unpack_from('<H', header, offset+4)[0] == 0x8664
+
         # Preserve the native review notes instead of claiming real-session validation.
         review = folder / (platform + '-REVIEW_REQUIRED.txt')
         review.write_bytes((folder / 'REVIEW_REQUIRED.txt').read_bytes())
@@ -64,9 +85,9 @@ def main():
     notes = root / 'OPERATOR-DOWNLOADS.md'
     notes.write_text('''Operatori ArceusTech Remote Support — build 494d39c con nuovo logo e server preconfigurato.
 
-Bozza privata per il titolare del repository: macOS Apple Silicon e Intel. Windows standard-user è in ricompilazione e non è incluso in questa prima preparazione. Installer, ZIP, sorgenti corrispondenti e checksum inclusi. Windows 32 bit resta interno: compatibilità Sciter/AGPL non risolta. Avvisi di revisione originali allegati. Nessuna firma Windows o notarizzazione macOS; sessioni remote reali da collaudare.
+Bozza privata per il titolare del repository: Windows 64/32 bit nella sessione utente e macOS Apple Silicon/Intel. Windows non include il passaggio automatico a SYSTEM; alcune finestre UAC e schermate protette non sono controllabili remotamente. Installer, ZIP, sorgenti corrispondenti e checksum inclusi. Windows 32 bit resta interno: compatibilità Sciter/AGPL non risolta. Avvisi di revisione originali allegati. Nessuna firma Windows o notarizzazione macOS; sessioni remote reali da collaudare.
 
-Per i clienti usare esclusivamente la release separata v2026.10.03-client-beta-494d39c. Questa bozza operatore non deve essere pubblicata.
+Per i clienti usare esclusivamente le release cliente separate v2026.10.03-client-beta-494d39c (Mac) e v2026.10.03-windows-user-beta (Windows 64 bit). Questa bozza operatore non deve essere pubblicata.
 ''')
     existing = [release for release in api('releases?per_page=100') if release['tag_name'] == TAG]
     if existing:
