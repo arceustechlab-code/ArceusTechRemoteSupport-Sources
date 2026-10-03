@@ -10,9 +10,15 @@ Scaricare l'allegato **source-snapshot-494d39c.tar.gz**. I collegamenti automati
 
 ## Pacchetti cliente e operatore
 
-Le nuove compilazioni Windows 64 bit, macOS Apple Silicon, macOS Intel e Windows 32 bit sono in corso per entrambi i profili. Gli installer aggiornati non sono ancora pubblicati. I pacchetti nativi vengono salvati in una bozza interna per la verifica, senza esporre quelli operatore.
+Sono pubblicate le beta cliente con nuovo logo e server aziendale preconfigurato:
 
-I pacchetti cliente pubblicati avranno archivi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum corrispondenti a ciascuna piattaforma. I vecchi binari non sono sostituiti dalla sola pubblicazione dei nuovi avvisi.
+- [Windows 64 bit — installer](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-windows-user-beta/ArceusTechRemoteSupport-Setup.exe)
+- [macOS Apple Silicon — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-client-beta-494d39c/ArceusTechRemoteSupport-macOS-arm64.dmg)
+- [macOS Intel — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-client-beta-494d39c/ArceusTechRemoteSupport-macOS-x86_64.dmg)
+
+Le release [Windows](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-windows-user-beta) e [Mac](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-client-beta-494d39c) contengono ZIP, archivi completi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum verificati. Windows usa la normale sessione utente, senza passaggio automatico a SYSTEM: alcune finestre UAC e schermate protette non sono controllabili remotamente. I pacchetti operatore restano privati.
+
+Tutte e quattro le build Windows cliente/operatore 64/32 bit aggiornate sono riuscite. Nessuna firma Windows o notarizzazione Mac. Le beta richiedono ancora il collaudo di una sessione reale su due computer; seguire [download e primo collegamento](GETTING-STARTED.md).
 
 Per Windows 32 bit resta da chiarire la compatibilità della licenza del motore proprietario Sciter con AGPL; il relativo pacchetto rimane interno. Il test TCP del 3 ottobre 2026 è riuscito sulle porte configurate del server ID e del relay. La prova di una sessione remota completa sui computer destinatari resta da eseguire.
 
