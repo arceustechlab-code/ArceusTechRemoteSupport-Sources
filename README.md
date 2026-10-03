@@ -1,5 +1,7 @@
 # ArceusTech Remote Support — sorgenti e licenze
 
+Aggiornamento Mac del 3 ottobre: corretta la firma ad-hoc che poteva bloccare il caricamento di Flutter con errore Team ID. Scaricare i nuovi DMG e sostituire l'app in Applicazioni. Avvio normale mantenuto per 15 secondi sui runner macOS Tahoe ARM64 e Intel; sessione remota sui dispositivi reali ancora da collaudare. La notarizzazione Apple resta assente: può essere necessario autorizzare l'app con Apri comunque in Privacy e sicurezza.
+
 Sorgenti pubblici di ArceusTech Remote Support, basato su RustDesk e RustDesk Server OSS. Le licenze originali, incluse AGPL-3.0 e quelle delle dipendenze, sono conservate negli archivi.
 
 ## Sorgenti aggiornati
@@ -13,10 +15,10 @@ Scaricare l'allegato **source-snapshot-494d39c.tar.gz**. I collegamenti automati
 Sono pubblicate le beta cliente con nuovo logo e server aziendale preconfigurato:
 
 - [Windows 64 bit — installer](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-windows-user-beta/ArceusTechRemoteSupport-Setup.exe)
-- [macOS Apple Silicon — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-client-beta-494d39c/ArceusTechRemoteSupport-macOS-arm64.dmg)
-- [macOS Intel — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-client-beta-494d39c/ArceusTechRemoteSupport-macOS-x86_64.dmg)
+- [macOS Apple Silicon — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-mac-signfix-beta/ArceusTechRemoteSupport-macOS-arm64.dmg)
+- [macOS Intel — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-mac-signfix-beta/ArceusTechRemoteSupport-macOS-x86_64.dmg)
 
-Le release [Windows](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-windows-user-beta) e [Mac](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-client-beta-494d39c) contengono ZIP, archivi completi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum verificati. Windows usa la normale sessione utente, senza passaggio automatico a SYSTEM: alcune finestre UAC e schermate protette non sono controllabili remotamente. I pacchetti operatore restano privati.
+Le release [Windows](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-windows-user-beta) e [Mac](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-mac-signfix-beta) contengono ZIP, archivi completi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum verificati. Windows usa la normale sessione utente, senza passaggio automatico a SYSTEM: alcune finestre UAC e schermate protette non sono controllabili remotamente. I pacchetti operatore restano privati.
 
 Tutte e quattro le build Windows cliente/operatore 64/32 bit aggiornate sono riuscite. Nessuna firma Windows o notarizzazione Mac. Le beta richiedono ancora il collaudo di una sessione reale su due computer; seguire [download e primo collegamento](GETTING-STARTED.md).
 
