@@ -7,12 +7,16 @@ from publish_clients import REPO, RUN, DRAFT, api, digest, download, validate_so
 
 TAG = 'operator-2026.10.03-494d39c'
 BASE = 'ArceusTechRemoteSupportOperator'
+ASSET_PLATFORM_ALIASES = {'macos-x86_64': 'macos-x64'}
 PACKAGES = {
     'windows-x64': ['-Setup.exe', '-Windows-x64.zip'],
     'windows-x86': ['-Windows-x86-Setup.exe', '-Windows-x86.zip'],
     'macos-arm64': ['-macOS-arm64.dmg', '-macOS-arm64.app.zip'],
     'macos-x86_64': ['-macOS-x86_64.dmg', '-macOS-x86_64.app.zip'],
 }
+# Stage only unchanged Mac operators while Windows remediation builds.
+PACKAGES.pop('windows-x64')
+PACKAGES.pop('windows-x86')
 
 
 def main():
@@ -33,7 +37,7 @@ def main():
     root.mkdir(exist_ok=True)
     files = []
     for platform, suffixes in PACKAGES.items():
-        prefix = 'candidate-494d39c-operator-' + ('macos-x64' if platform == 'macos-x86_64' else platform) + '-'
+        prefix = 'candidate-494d39c-operator-' + ASSET_PLATFORM_ALIASES.get(platform, platform) + '-'
         source = BASE + '-' + ({'windows-x64': 'Windows-x64', 'windows-x86': 'Windows-x86', 'macos-arm64': 'macOS-arm64', 'macos-x86_64': 'macOS-x86_64'}[platform]) + '-source.tar.gz'
         names = [BASE + suffix for suffix in suffixes] + [source, source + '.manifest.json', source + '.sha256', 'SHA256SUMS.txt', 'REVIEW_REQUIRED.txt']
         folder = root / platform
@@ -60,7 +64,7 @@ def main():
     notes = root / 'OPERATOR-DOWNLOADS.md'
     notes.write_text('''Operatori ArceusTech Remote Support — build 494d39c con nuovo logo e server preconfigurato.
 
-Bozza privata per il titolare del repository: Windows 64 bit e 32 bit, macOS Apple Silicon e Intel. Installer, ZIP, sorgenti corrispondenti e checksum inclusi. Windows 32 bit resta interno: compatibilità Sciter/AGPL non risolta. Avvisi di revisione originali allegati. Nessuna firma Windows o notarizzazione macOS; sessioni remote reali da collaudare.
+Bozza privata per il titolare del repository: macOS Apple Silicon e Intel. Windows standard-user è in ricompilazione e non è incluso in questa prima preparazione. Installer, ZIP, sorgenti corrispondenti e checksum inclusi. Windows 32 bit resta interno: compatibilità Sciter/AGPL non risolta. Avvisi di revisione originali allegati. Nessuna firma Windows o notarizzazione macOS; sessioni remote reali da collaudare.
 
 Per i clienti usare esclusivamente la release separata v2026.10.03-client-beta-494d39c. Questa bozza operatore non deve essere pubblicata.
 ''')
