@@ -4,11 +4,11 @@ Build Mac: `494d39c40759098e568658cf5d877c2ea3f788ad`. La sorgente Windows aggio
 
 ## Download
 
-La [beta cliente](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-client-beta-494d39c) è pubblicata per macOS Apple Silicon e macOS Intel, con i rispettivi sorgenti e checksum. Windows nella sessione utente è in ricompilazione e non è incluso in questa release Mac.
+La [beta cliente](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-client-beta-494d39c) è pubblicata per macOS Apple Silicon e macOS Intel, con i rispettivi sorgenti e checksum. La [beta Windows 64 bit nella sessione utente](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-windows-user-beta) è pubblicata separatamente, con installer EXE e ZIP portable, sorgenti e checksum. I download diretti Windows e Mac sono verificati senza autenticazione.
 
-Gli operatori usano la [bozza privata dedicata](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/untagged-5bfc94253fe36ccaa908), accessibile al titolare con GitHub autenticato; i pacchetti Mac sono già preparati. La bozza non va pubblicata. Per distribuire un operatore a un collega, il titolare scarica il pacchetto corretto e glielo consegna direttamente.
+Gli operatori usano la [bozza privata dedicata](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/untagged-5bfc94253fe36ccaa908), accessibile al titolare con GitHub autenticato; i pacchetti Windows 64/32 bit e Mac sono preparati. La bozza non va pubblicata. Per distribuire un operatore a un collega, il titolare scarica il pacchetto corretto e glielo consegna direttamente.
 
-Windows 32 bit era compilato per entrambi i profili; le nuove build nella sessione utente sono in corso e rimangono interne in attesa della verifica di compatibilità Sciter/AGPL. Gli avvisi originali sono conservati. Non viene dichiarato pronto alla distribuzione pubblica.
+Windows 32 bit nella sessione utente è compilato con successo per entrambi i profili e rimane interno in attesa della verifica di compatibilità Sciter/AGPL. Gli avvisi originali sono conservati. Non viene dichiarato pronto alla distribuzione pubblica.
 
 ## Installazione
 
