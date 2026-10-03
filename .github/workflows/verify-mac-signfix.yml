@@ -1,0 +1,52 @@
+name: Verify repaired Mac downloads and mark previous Mac beta superseded
+on:
+  push:
+    paths: ['.github/workflows/verify-mac-signfix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - name: Check corrected DMG downloads without authentication
+        run: |
+          python3 - <<'PY'
+          import json, time, urllib.request, urllib.error
+          repo = 'arceustechlab-code/ArceusTechRemoteSupport-Sources'
+          tag = 'v2026.10.03-mac-signfix-beta'
+          deadline = time.monotonic() + 1800
+          while True:
+              try:
+                  with urllib.request.urlopen('https://api.github.com/repos/' + repo + '/releases/tags/' + tag, timeout=30) as response:
+                      release = json.load(response)
+                  break
+              except urllib.error.HTTPError as error:
+                  assert error.code == 404
+                  assert time.monotonic() < deadline
+                  print('Waiting for verified Mac customer publication', flush=True)
+                  time.sleep(30)
+          assert not release['draft'] and release['prerelease']
+          assert not any('Operator' in a['name'] or 'Windows' in a['name'] for a in release['assets'])
+          assets = {a['name']:a for a in release['assets']}
+          for arch in ('arm64', 'x86_64'):
+              name = 'ArceusTechRemoteSupport-macOS-' + arch + '.dmg'
+              asset = assets[name]
+              with urllib.request.urlopen(urllib.request.Request(asset['browser_download_url'], method='HEAD'), timeout=30) as response:
+                  assert response.status == 200
+                  assert int(response.headers['Content-Length']) == asset['size']
+                  print(name, 'anonymous download verified', asset['size'], flush=True)
+          PY
+      - name: Point previous Mac beta users to the verified signing repair
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > superseded.md <<'NOTES'
+          Questa beta Mac è superata: il precedente pacchetto può essere bloccato durante il caricamento del framework Flutter per un errore di firma ad-hoc.
+          
+          Scaricare la beta corretta: https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.03-mac-signfix-beta
+          
+          Gli archivi originali e i sorgenti restano disponibili per tracciabilità. Le versioni corrette conservano logo, server e avvisi OSS. Mac senza notarizzazione; sessione remota reale ancora da collaudare.
+          NOTES
+          gh release edit v2026.10.03-client-beta-494d39c --repo arceustechlab-code/ArceusTechRemoteSupport-Sources --notes-file superseded.md
