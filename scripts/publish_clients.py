@@ -76,7 +76,8 @@ def validate_source(archive, manifest, role='customer'):
     assert b'GNU AFFERO GENERAL PUBLIC LICENSE' in documents['LICENSE']
     inventory = json.loads(documents['source-offer/resolved/inventory.json'])
     assert len(inventory) > 500
-    assert not any(item['review_required'] for item in inventory), 'Missing dependency notices'
+    missing = [item['component'] for item in inventory if item['review_required']]
+    assert not missing, f'Missing dependency notices: {missing}'
     assert not any('default_net-' in item['component'] for item in inventory), 'Obsolete unlicensed dependency'
     assert any(name.startswith('work/dependency-sources/') for name in found), 'Dependency sources missing'
     assert any('bridge_generated.rs' in name for name in found), 'Generated bridge missing'
@@ -125,7 +126,7 @@ def main():
     report = {'source_commit': '494d39c40759098e568658cf5d877c2ea3f788ad', 'native_run': RUN, 'release_type': 'beta', 'remote_session_test': 'not_performed', 'windows_signed': False, 'macos_notarized': False, 'windows_x86': 'internal; Sciter licensing compatibility unresolved', 'platforms': {}}
     publish = []
     for platform, (base, binaries, source_suffix) in PLATFORMS.items():
-        prefix = PREFIX + platform + '-'
+        prefix = PREFIX + ('macos-x64' if platform == 'macos-x86_64' else platform) + '-'
         output_names = [base + suffix for suffix in binaries]
         source_name = base + source_suffix
         required = output_names + [source_name, source_name + '.manifest.json', source_name + '.sha256', 'SHA256SUMS.txt']
