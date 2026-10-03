@@ -4,8 +4,8 @@ import subprocess
 import stage_operators as staging
 deadline = time.monotonic() + 2700
 while True:
-    run = staging.api('actions/runs/37120849176')
-    assert run['head_sha'] == 'c6ef64ea9c1027bee89d6dc99d138af070674187'
+    run = staging.api('actions/runs/37120988692')
+    assert run['head_sha'] == '56b3dd93fa2f1d502bde5da1214eec853177de57'
     if run['status'] == 'completed':
         assert run['conclusion'] == 'success', 'Mac repair must pass before operator staging'
         break
