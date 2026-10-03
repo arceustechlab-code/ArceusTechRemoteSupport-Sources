@@ -1,7 +1,7 @@
 name: Repair existing Mac signing and verify Tahoe startup
 on:
   push:
-    paths: ['.github/workflows/mac-signing-repair.yml']
+    paths: ['.github/workflows/mac-signing-repair.yml', 'scripts/repackage_macos.py']
   workflow_dispatch:
 permissions:
   contents: write
