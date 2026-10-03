@@ -1,0 +1,21 @@
+name: ArceusTech reviewed native candidates
+'on':
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        role:
+        - customer
+        - operator
+    uses: ./.github/workflows/candidate-desktop.yml
+    with:
+      role: ${{ matrix.role }}
+      require_configured: true
+  x86:
+    uses: ./.github/workflows/candidate-windows-x86.yml
+    with:
+      role: both
