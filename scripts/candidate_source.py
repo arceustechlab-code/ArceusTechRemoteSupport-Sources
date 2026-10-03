@@ -8,7 +8,7 @@ import tarfile
 ROOT = Path.cwd().resolve()
 ARCHIVE = Path(os.environ['RUNNER_TEMP']) / 'arceus-source-494d39c.tar.gz'
 with ARCHIVE.open('wb') as output:
-    subprocess.run(['gh', 'api', '/repos/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/assets/607447673', '-H', 'Accept: application/octet-stream'], stdout=output, check=True)
+    subprocess.run(['gh', 'api', '/repos/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/assets/607466771', '-H', 'Accept: application/octet-stream'], stdout=output, check=True)
 assert hashlib.sha256(ARCHIVE.read_bytes()).hexdigest() == '5662d27b07ed2564f684d2bf8e3731e50baf4ec8842e4eed99655951d24e93bc', 'Source checksum mismatch'
 with tarfile.open(ARCHIVE, 'r:gz') as archive:
     members = archive.getmembers()
