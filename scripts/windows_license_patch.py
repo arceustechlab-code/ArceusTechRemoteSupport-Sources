@@ -42,6 +42,9 @@ pub fn run_as_system(_arg: &str) -> ResultType<()> {
     text = bsl.read_text()
     assert 'Boost Software License' in text
     registry['licenses']['BSL-1.0'] = {'url': 'https://raw.githubusercontent.com/spdx/license-list-data/31ba1a50e5397e00a304dbadc76531740e89ee48/text/BSL-1.0.txt', 'text': text, 'sha256': hashlib.sha256(text.encode()).hexdigest()}
+    unlicense = (ROOT / 'scripts/Unlicense.txt').read_text()
+    assert 'public domain' in unlicense
+    registry['licenses']['Unlicense'] = {'url': 'https://raw.githubusercontent.com/spdx/license-list-data/31ba1a50e5397e00a304dbadc76531740e89ee48/text/Unlicense.txt', 'text': unlicense, 'sha256': hashlib.sha256(unlicense.encode()).hexdigest()}
     terms.write_text(json.dumps(registry, indent=2) + '\n')
     helper = ROOT / 'scripts/verified_notices.py'
     data = helper.read_text()
@@ -68,7 +71,7 @@ pub fn run_as_system(_arg: &str) -> ResultType<()> {
         return paths
 '''
     data = data.replace(needle, needle + extra)
-    data = data.replace("choices = {'MIT': 'MIT'", "choices = {'BSL-1.0': 'BSL-1.0', 'MIT': 'MIT'")
+    data = data.replace("choices = {'MIT': 'MIT'", "choices = {'BSL-1.0': 'BSL-1.0', 'Unlicense': 'Unlicense', 'MIT': 'MIT'")
     helper.write_text(data)
     doc = ROOT / 'docs/WINDOWS_STANDARD_USER.md'
     doc.write_text('''# Windows standard-user support profile
