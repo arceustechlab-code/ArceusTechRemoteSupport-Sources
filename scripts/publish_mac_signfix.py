@@ -1,8 +1,8 @@
 """Distribute only verified Mac signing-repair customer packages."""
 import publish_clients as publisher
-publisher.RUN = 37120849176
-publisher.EXPECTED_HEAD_SHA = 'c6ef64ea9c1027bee89d6dc99d138af070674187'
-publisher.PATCH_REVISION = 'c6ef64ea9c1027bee89d6dc99d138af070674187'
+publisher.RUN = 37120988692
+publisher.EXPECTED_HEAD_SHA = '56b3dd93fa2f1d502bde5da1214eec853177de57'
+publisher.PATCH_REVISION = '56b3dd93fa2f1d502bde5da1214eec853177de57'
 publisher.ASSET_PLATFORM_ALIASES.update({'macos-arm64':'macos-arm64-signfix','macos-x86_64':'macos-x86_64-signfix'})
 publisher.TAG = 'v2026.10.03-mac-signfix-beta'
 publisher.main()
