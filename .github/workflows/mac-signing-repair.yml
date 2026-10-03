@@ -1,0 +1,38 @@
+name: Repair existing Mac signing and verify Tahoe startup
+on:
+  push:
+    paths: ['.github/workflows/mac-signing-repair.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    strategy:
+      fail-fast: false
+      matrix:
+        role: [customer, operator]
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+        arch: [arm64, x86_64]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Verify original packages, repair ad-hoc signatures and test normal startup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CANDIDATE_ROLE: ${{ matrix.role }}
+          MAC_ARCH: ${{ matrix.arch }}
+        run: python scripts/repackage_macos.py
+      - name: Save repaired packages in existing private draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CANDIDATE_ROLE: ${{ matrix.role }}
+          CANDIDATE_PLATFORM: macos-${{ matrix.arch }}-signfix
+        run: python scripts/candidate_upload.py
