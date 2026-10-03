@@ -1,0 +1,31 @@
+name: ArceusTech public server readiness
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  readiness:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Read checksum-verified public configuration
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/candidate_source.py
+      - name: Check configured TCP listeners (not a desktop session test)
+        run: |
+          python - <<'PY'
+          import hashlib, json, socket
+          from pathlib import Path
+          settings = json.loads(Path('config/server-public.json').read_text())
+          print('Configured public-key SHA256:', hashlib.sha256(settings['SERVER_PUBLIC_KEY'].encode()).hexdigest())
+          for field in ('ID_SERVER', 'RELAY_SERVER'):
+              host, port = settings[field].rsplit(':', 1)
+              with socket.create_connection((host, int(port)), timeout=10):
+                  print(field, host, port, 'TCP reachable')
+          print('TCP listeners verified. UDP, screen capture and a real remote session remain untested.')
+          PY
