@@ -104,7 +104,7 @@ def main():
             (staging/name).write_bytes(original_doc.read_bytes())
     run('hdiutil','create','-volname',app.stem,'-srcfolder',str(staging),'-format','UDZO','-ov',str(dist/f'{base}-macOS-{arch}.dmg'))
     # Preserve every source member, changing only the packaging signer.
-    with tarfile.open(incoming/source_name,'r|gz') as source, tarfile.open(dist/source_name,'w|gz',compresslevel=6) as output:
+    with tarfile.open(incoming/source_name,'r|gz') as source, tarfile.open(str(dist/source_name),'w|gz',compresslevel=6) as output:
         for member in source:
             if member.isfile():
                 relative = '/'.join(Path(member.name).parts[1:])
