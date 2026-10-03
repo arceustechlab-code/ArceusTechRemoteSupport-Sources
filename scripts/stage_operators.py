@@ -33,7 +33,7 @@ def main():
     root.mkdir(exist_ok=True)
     files = []
     for platform, suffixes in PACKAGES.items():
-        prefix = 'candidate-494d39c-operator-' + platform + '-'
+        prefix = 'candidate-494d39c-operator-' + ('macos-x64' if platform == 'macos-x86_64' else platform) + '-'
         source = BASE + '-' + ({'windows-x64': 'Windows-x64', 'windows-x86': 'Windows-x86', 'macos-arm64': 'macOS-arm64', 'macos-x86_64': 'macOS-x86_64'}[platform]) + '-source.tar.gz'
         names = [BASE + suffix for suffix in suffixes] + [source, source + '.manifest.json', source + '.sha256', 'SHA256SUMS.txt', 'REVIEW_REQUIRED.txt']
         folder = root / platform
