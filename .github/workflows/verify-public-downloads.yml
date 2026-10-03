@@ -1,0 +1,25 @@
+name: Verify anonymous Mac client downloads
+on:
+  push:
+    paths: ['.github/workflows/verify-public-downloads.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-downloads:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Check direct downloads without GitHub authentication
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          base = 'https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.03-client-beta-494d39c/'
+          expected = {'ArceusTechRemoteSupport-macOS-arm64.dmg':33146843, 'ArceusTechRemoteSupport-macOS-x86_64.dmg':36602854}
+          for name, size in expected.items():
+              with urllib.request.urlopen(urllib.request.Request(base+name, method='HEAD'),timeout=30) as response:
+                  assert response.status == 200
+                  assert int(response.headers['Content-Length']) == size
+                  assert 'text/html' not in response.headers.get('Content-Type','')
+                  print(name, 'anonymous download available', response.status, size, 'bytes')
+          PY
