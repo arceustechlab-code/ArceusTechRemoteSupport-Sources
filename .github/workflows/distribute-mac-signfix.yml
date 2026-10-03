@@ -1,3 +1,4 @@
+# Verified repair input: run 37120988692 (source archive path correction)
 name: Distribute verified Mac signing repairs
 on:
   push:
