@@ -15,6 +15,9 @@ from pathlib import Path, PurePosixPath
 
 REPO = 'arceustechlab-code/ArceusTechRemoteSupport-Sources'
 RUN = 37109995106
+EXPECTED_HEAD_SHA = 'f3acda446e75eb4266978e01db42bb6692c07ffa'
+ASSET_PLATFORM_ALIASES = {'macos-x86_64': 'macos-x64'}
+PATCH_REVISION = None
 DRAFT = 402397093
 PREFIX = 'candidate-494d39c-customer-'
 TAG = 'v2026.10.03-client-beta-494d39c'
@@ -23,6 +26,8 @@ PLATFORMS = {
     'macos-arm64': ('ArceusTechRemoteSupport', ['-macOS-arm64.dmg', '-macOS-arm64.app.zip'], '-macOS-arm64-source.tar.gz'),
     'macos-x86_64': ('ArceusTechRemoteSupport', ['-macOS-x86_64.dmg', '-macOS-x86_64.app.zip'], '-macOS-x86_64-source.tar.gz'),
 }
+# Windows is withheld while the authorized user-session remediation builds.
+PLATFORMS.pop('windows-x64')
 ROOT = Path('verified-clients')
 
 
@@ -113,7 +118,7 @@ def main():
     deadline = time.monotonic() + 2700
     while True:
         run = api(f'actions/runs/{RUN}')
-        assert run['head_sha'] == 'f3acda446e75eb4266978e01db42bb6692c07ffa'
+        assert run['head_sha'] == EXPECTED_HEAD_SHA
         if run['status'] == 'completed':
             assert run['conclusion'] == 'success', 'Existing native build failed; release left unpublished'
             break
@@ -123,10 +128,10 @@ def main():
     source_release = api(f'releases/{DRAFT}')
     assert source_release['draft'], 'Original internal release must remain private'
     assets = {asset['name']: asset for asset in source_release['assets']}
-    report = {'source_commit': '494d39c40759098e568658cf5d877c2ea3f788ad', 'native_run': RUN, 'release_type': 'beta', 'remote_session_test': 'not_performed', 'windows_signed': False, 'macos_notarized': False, 'windows_x86': 'internal; Sciter licensing compatibility unresolved', 'platforms': {}}
+    report = {'source_commit': '494d39c40759098e568658cf5d877c2ea3f788ad', 'source_patch_revision': PATCH_REVISION, 'native_run': RUN, 'release_type': 'beta', 'remote_session_test': 'not_performed', 'windows_signed': False, 'macos_notarized': False, 'windows_x86': 'internal; Sciter licensing compatibility unresolved', 'platforms': {}}
     publish = []
     for platform, (base, binaries, source_suffix) in PLATFORMS.items():
-        prefix = PREFIX + ('macos-x64' if platform == 'macos-x86_64' else platform) + '-'
+        prefix = PREFIX + ASSET_PLATFORM_ALIASES.get(platform, platform) + '-'
         output_names = [base + suffix for suffix in binaries]
         source_name = base + source_suffix
         required = output_names + [source_name, source_name + '.manifest.json', source_name + '.sha256', 'SHA256SUMS.txt']
@@ -156,9 +161,9 @@ def main():
     checksums = ROOT / 'SHA256SUMS.txt'
     checksums.write_text(''.join(f'{digest(path)}  {path.name}\n' for path in publish + [verification]))
     notes = ROOT / 'RELEASE-NOTES.md'
-    notes.write_text('''ArceusTech Remote Support — client beta, nuovo logo e server preconfigurato.
+    notes.write_text('Piattaforme incluse: ' + ', '.join(PLATFORMS) + '.\n\n' + '''ArceusTech Remote Support — client beta, nuovo logo e server preconfigurato.
 
-Download cliente: Windows 64 bit (installer o ZIP), macOS Apple Silicon e macOS Intel (DMG o app ZIP). Le versioni operatore restano private. Windows 32 bit resta interno in attesa della verifica di compatibilità della licenza Sciter.
+Usare esclusivamente i pacchetti delle piattaforme elencate sopra: EXE/ZIP per Windows oppure DMG/app ZIP per macOS. Le versioni operatore restano private. Windows 32 bit resta interno in attesa della verifica di compatibilità della licenza Sciter. Windows nella sessione utente: nessun passaggio automatico a SYSTEM; schermate protette e alcune finestre UAC/amministratore non controllabili remotamente.
 
 Questa è una beta per il collaudo: compilazioni, architetture, checksum, sorgenti corrispondenti, avvisi OSS e porte TCP del server verificati. Una sessione remota completa fra due computer e i permessi di acquisizione/controllo macOS restano da verificare. Windows non firmato; macOS senza notarizzazione.
 
