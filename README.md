@@ -1,6 +1,6 @@
 # ArceusTech Remote Support — sorgenti e licenze
 
-Aggiornamento del 4 ottobre: corretta la sincronizzazione dello stato dell'assistenza e della password cliente. Gli aggiornamenti con impostazioni vecchie non arrestano o riaprono la sessione e il controllo periodico non rigenera la password. Conservati password monouso e consenso locale. Test del controller e avvio GUI nei runner nativi superati; collaudo remoto completo dei nuovi pacchetti sui dispositivi reali ancora da eseguire. Windows non firmato e Mac con firma ad-hoc, senza notarizzazione.
+Aggiornamento del 4 ottobre: corretta la sincronizzazione dello stato dell'assistenza e della password cliente. Gli aggiornamenti con impostazioni vecchie non arrestano o riaprono la sessione e il controllo periodico non rigenera la password. Password stabile fino a Rigenera o chiusura dell’app, anche dopo un accesso, Stop/Start o perdita di rete. Consenso locale richiesto; operatore con ID e password prima della connessione e barra della sessione con icone e nomi leggibili. Test del controller e avvio GUI nei runner nativi superati; collaudo remoto completo dei nuovi pacchetti sui dispositivi reali ancora da eseguire. Windows non firmato e Mac con firma ad-hoc, senza notarizzazione.
 
 Sorgenti pubblici di ArceusTech Remote Support, basato su RustDesk e RustDesk Server OSS. Le licenze originali, incluse AGPL-3.0 e quelle delle dipendenze, sono conservate negli archivi.
 
@@ -14,11 +14,11 @@ Scaricare l'allegato **source-snapshot-494d39c.tar.gz**. I collegamenti automati
 
 Sono pubblicate le beta cliente con nuovo logo e server aziendale preconfigurato:
 
-- [Windows 64 bit — installer](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-session-beta/ArceusTechRemoteSupport-Setup.exe)
-- [macOS Apple Silicon — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-session-beta/ArceusTechRemoteSupport-macOS-arm64.dmg)
-- [macOS Intel — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-session-beta/ArceusTechRemoteSupport-macOS-x86_64.dmg)
+- [Windows 64 bit — installer](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-credentials-ui-beta/ArceusTechRemoteSupport-Setup.exe)
+- [macOS Apple Silicon — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-credentials-ui-beta/ArceusTechRemoteSupport-macOS-arm64.dmg)
+- [macOS Intel — DMG](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/download/v2026.10.04-credentials-ui-beta/ArceusTechRemoteSupport-macOS-x86_64.dmg)
 
-Le release [Windows](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-session-beta) e [Mac](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-session-beta) contengono ZIP, archivi completi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum verificati. Windows usa la normale sessione utente, senza passaggio automatico a SYSTEM: alcune finestre UAC e schermate protette non sono controllabili remotamente. I pacchetti operatore restano privati.
+Le release [Windows](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-credentials-ui-beta) e [Mac](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-credentials-ui-beta) contengono ZIP, archivi completi dei sorgenti delle dipendenze risolte, inventari delle licenze e checksum verificati. Windows usa la normale sessione utente, senza passaggio automatico a SYSTEM: alcune finestre UAC e schermate protette non sono controllabili remotamente. I pacchetti operatore restano privati.
 
 Tutte e quattro le build Windows cliente/operatore 64/32 bit aggiornate sono riuscite. Nessuna firma Windows o notarizzazione Mac. Le beta richiedono ancora il collaudo di una sessione reale su due computer; seguire [download e primo collegamento](GETTING-STARTED.md).
 
