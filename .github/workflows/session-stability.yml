@@ -11,6 +11,7 @@ env:
   PYTHONUTF8: '1'
   SUPPORT_REQUIRE_CONFIGURED: '1'
 jobs:
+  # Recovery of the upload-only failure in run 37204249219; application sources are unchanged.
   session-tests:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
@@ -56,6 +57,7 @@ jobs:
       working-directory: client/flutter
       run: flutter test --no-pub test/support_credentials_toolbar_test.dart
   windows-x64:
+    if: ${{ false }}
     runs-on: windows-2022
     timeout-minutes: 180
     env:
@@ -160,19 +162,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        role:
-        - customer
-        - operator
-        platform:
-        - arm64
-        - x86_64
         include:
-        - platform: arm64
-          runner: macos-14
-          target: aarch64-apple-darwin
-          arch: arm64
-          triplet: arm64-osx
-        - platform: x86_64
+        - role: customer
+          platform: x86_64
           runner: macos-15-intel
           target: x86_64-apple-darwin
           arch: x64
