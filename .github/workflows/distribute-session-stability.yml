@@ -9,7 +9,7 @@ permissions:
   actions: read
 jobs:
   customer:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'baf2d24e5f6081efe58b68daf4e387eab5d78f7d')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'pending-complete-session-revision')
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
@@ -22,7 +22,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/publish_session_clients.py
   operator:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'baf2d24e5f6081efe58b68daf4e387eab5d78f7d')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'pending-complete-session-revision')
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
