@@ -21,6 +21,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/publish_session_clients.py
+      - name: Verify anonymous downloads and update public customer links
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/verify_session_downloads.py
   operator:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == '70f88b7528a807785501a3c51c55e4a4b44c6464')
     runs-on: ubuntu-22.04
