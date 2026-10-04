@@ -1,0 +1,254 @@
+name: Verify session stability and build existing support profiles
+'on':
+  push:
+    paths:
+    - .github/workflows/session-stability.yml
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  actions: read
+env:
+  PYTHONUTF8: '1'
+  SUPPORT_REQUIRE_CONFIGURED: '1'
+jobs:
+  session-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - name: Verify and extract reviewed source 494d39c
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: python scripts/candidate_source.py
+    - name: Apply reviewed session fixes
+      run: python scripts/apply_session_fix.py
+    - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+      with:
+        toolchain: '1.75'
+    - name: 'Regression: stale options, early Start and Stop cancellation'
+      run: python scripts/test_support_session.py
+  windows-x64:
+    runs-on: windows-2022
+    timeout-minutes: 180
+    env:
+      VCPKG_ROOT: C:\vcpkg
+      VCPKG_DEFAULT_TRIPLET: x64-windows-static
+      VCPKG_DEFAULT_HOST_TRIPLET: x64-windows-static
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - name: Verify and extract reviewed source 494d39c
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: python scripts/candidate_source.py
+    - name: Apply authorized user-session Windows profile and original/declared notices
+      run: python scripts/windows_license_patch.py
+    - name: Apply reviewed session fixes
+      run: python scripts/apply_session_fix.py
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        name: support-bridge-${{ matrix.role }}
+        path: client
+        run-id: 37109995106
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0
+      with:
+        version: 15.0.6
+    - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+      with:
+        toolchain: '1.75'
+        targets: x86_64-pc-windows-msvc
+        components: rustfmt
+    - uses: subosito/flutter-action@2783a3f08e1baf891508463f8c6653c258246225
+      with:
+        flutter-version: 3.24.5
+        channel: stable
+        architecture: x64
+    - name: Patch stock Flutter SDK as in upstream x64 build
+      shell: bash
+      run: 'cd "$(dirname "$(dirname "$(which flutter)")")"
+
+        git apply "$GITHUB_WORKSPACE/client/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff"
+
+        '
+    - uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2
+      with:
+        vcpkgDirectory: C:\vcpkg
+        vcpkgGitCommitId: 9e593bb18ea69cc5095e012465dcd675a822ed0d
+        doNotCache: false
+    - name: Native dependencies
+      working-directory: client
+      shell: pwsh
+      run: '& "$env:VCPKG_ROOT/vcpkg.exe" install --triplet x64-windows-static --x-install-root="$env:VCPKG_ROOT/installed"
+
+        if ($LASTEXITCODE -ne 0) { throw ''vcpkg failed'' }
+
+        '
+    - name: Configure public endpoints and branding
+      shell: pwsh
+      env:
+        SUPPORT_ID_SERVER: ${{ vars.SUPPORT_ID_SERVER }}
+        SUPPORT_RELAY_SERVER: ${{ vars.SUPPORT_RELAY_SERVER }}
+        SUPPORT_PUBLIC_KEY: ${{ vars.SUPPORT_PUBLIC_KEY }}
+        SUPPORT_SOURCE_URL: ${{ vars.SUPPORT_SOURCE_URL }}
+        SUPPORT_ROLE: ${{ matrix.role }}
+      run: 'python scripts/configure_ci.py
+
+        if ($LASTEXITCODE -ne 0) { throw ''Public settings are incomplete or invalid; set all four variables, or leave all four empty for an unconfigured build''
+        }
+
+        '
+    - name: Inno Setup
+      shell: pwsh
+      run: "if (-not (Test-Path 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe')) {\n  choco install innosetup --version=6.4.3 -y --no-progress\n  if ($LASTEXITCODE\
+        \ -ne 0) { throw 'Inno Setup installation failed' }\n}\n"
+    - name: Build, license collection, installer and corresponding sources
+      shell: pwsh
+      run: ./scripts/build-windows.ps1 -SkipConfigure
+    - name: Verify normal GUI startup
+      run: python scripts/smoke_session_gui.py
+    - name: Save native packages to private draft only
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CANDIDATE_ROLE: ${{ matrix.role }}
+        CANDIDATE_PLATFORM: windows-x64-sessionfix-20261004
+      run: python scripts/candidate_upload.py
+    strategy:
+      fail-fast: false
+      matrix:
+        role:
+        - customer
+        - operator
+    needs: session-tests
+  macos:
+    needs: session-tests
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        role:
+        - customer
+        - operator
+        platform:
+        - arm64
+        - x86_64
+        include:
+        - platform: arm64
+          runner: macos-14
+          target: aarch64-apple-darwin
+          arch: arm64
+          triplet: arm64-osx
+        - platform: x86_64
+          runner: macos-15-intel
+          target: x86_64-apple-darwin
+          arch: x64
+          triplet: x64-osx
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
+      MACOSX_DEPLOYMENT_TARGET: '12.3'
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - name: Verify and extract reviewed source 494d39c
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: python scripts/candidate_source.py
+    - name: Apply reviewed session fixes and existing ad-hoc signing repair
+      run: python scripts/apply_session_fix.py
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        name: support-bridge-${{ matrix.role }}
+        path: client
+        run-id: 37109995106
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - name: Native build prerequisites
+      shell: bash
+      run: 'brew install llvm
+
+        command -v pkg-config || brew install pkg-config
+
+        command -v pod || brew install cocoapods
+
+        echo "LIBCLANG_PATH=$(brew --prefix llvm)/lib" >> "$GITHUB_ENV"
+
+        # Follow the upstream NASM 2.x recipe; NASM 3.x is incompatible with these codec ports.
+
+        curl --fail --location --retry 3 https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/macosx/nasm-2.16.03-macosx.zip -o "$RUNNER_TEMP/nasm.zip"
+
+        unzip -q "$RUNNER_TEMP/nasm.zip" -d "$RUNNER_TEMP/nasm"
+
+        echo "$RUNNER_TEMP/nasm/nasm-2.16.03" >> "$GITHUB_PATH"
+
+        '
+    - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+      with:
+        toolchain: '1.81'
+        targets: ${{ matrix.target }}
+        components: rustfmt
+    - uses: subosito/flutter-action@2783a3f08e1baf891508463f8c6653c258246225
+      with:
+        flutter-version: 3.24.5
+        channel: stable
+        architecture: ${{ matrix.arch }}
+    - name: Apply upstream Flutter patches
+      shell: bash
+      run: 'SDK="$(cd "$(dirname "$(command -v flutter)")/.." && pwd)"
+
+        git -C "$SDK" apply "$GITHUB_WORKSPACE/client/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff"
+
+        python3 - "$SDK" <<''PY''
+
+        import sys
+
+        from pathlib import Path
+
+        p=Path(sys.argv[1])/''packages/flutter/lib/src/scheduler/binding.dart''
+
+        p.write_text(p.read_text().replace(''_setFramesEnabledState(false);'',''//_setFramesEnabledState(false);''))
+
+        PY
+
+        '
+    - uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2
+      with:
+        vcpkgGitCommitId: 9e593bb18ea69cc5095e012465dcd675a822ed0d
+        doNotCache: false
+    - name: Native dependencies
+      working-directory: client
+      run: '"$VCPKG_ROOT/vcpkg" install --triplet "$VCPKG_DEFAULT_TRIPLET" --x-install-root="$VCPKG_ROOT/installed"'
+    - name: Configure public endpoints and branding
+      env:
+        SUPPORT_ID_SERVER: ${{ vars.SUPPORT_ID_SERVER }}
+        SUPPORT_RELAY_SERVER: ${{ vars.SUPPORT_RELAY_SERVER }}
+        SUPPORT_PUBLIC_KEY: ${{ vars.SUPPORT_PUBLIC_KEY }}
+        SUPPORT_SOURCE_URL: ${{ vars.SUPPORT_SOURCE_URL }}
+        SUPPORT_ROLE: ${{ matrix.role }}
+      run: python3 scripts/configure_ci.py
+    - name: Build app, optional signing, DMG and corresponding sources
+      run: bash scripts/build-macos.sh --skip-configure
+    - name: Verify normal GUI startup
+      run: python scripts/smoke_session_gui.py
+    - name: Save native packages to private draft only
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CANDIDATE_ROLE: ${{ matrix.role }}
+        CANDIDATE_PLATFORM: macos-${{ matrix.platform }}-sessionfix-20261004
+      run: python scripts/candidate_upload.py
+    permissions:
+      contents: write
+      actions: read
