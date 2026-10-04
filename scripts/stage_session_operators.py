@@ -5,7 +5,7 @@ import publish_session_clients as session
 
 run = staging.api('actions/runs/' + str(session.RUN))
 assert run['head_sha'] == session.HEAD and run['status'] == 'completed' and run['conclusion'] == 'success'
-staging.ASSET_PLATFORM_ALIASES.update({p: p + '-sessionfix2-20261004' for p in ('windows-x64','macos-arm64','macos-x86_64')})
+staging.ASSET_PLATFORM_ALIASES.update({p: p + '-sessionfix3-20261004' for p in ('windows-x64','macos-arm64','macos-x86_64')})
 staging.validate_source = session.validate_session_source
 staging.main()
 notes = staging.Path('operator-packages/OPERATOR-DOWNLOADS.md')
