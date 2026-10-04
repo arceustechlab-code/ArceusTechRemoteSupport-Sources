@@ -10,6 +10,10 @@ root = Path.cwd()
 manifest = json.loads((root / 'scripts/session-fix-manifest.json').read_text())
 for name, entry in manifest.items():
     path = root / name
-    assert git_blob(path.read_bytes()) == entry['before'], 'Unexpected source: ' + name
+    if entry['before'] is None:
+        assert not path.exists(), 'Unexpected existing source: ' + name
+        path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        assert git_blob(path.read_bytes()) == entry['before'], 'Unexpected source: ' + name
     path.write_bytes(entry['after_content'].encode())
 print('Reviewed session fix applied to', len(manifest), 'exact source files.')
