@@ -9,7 +9,7 @@ permissions:
   actions: read
 jobs:
   customer:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == '8f9b1b3761214715fa7c2c42b13ccf873132bb2c')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'cfea17d703e2915087e390ce5e846ad67b243fd3')
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
@@ -26,7 +26,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/verify_session_downloads.py
   operator:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == '8f9b1b3761214715fa7c2c42b13ccf873132bb2c')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'cfea17d703e2915087e390ce5e846ad67b243fd3')
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
@@ -38,3 +38,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/stage_session_operators.py
+
