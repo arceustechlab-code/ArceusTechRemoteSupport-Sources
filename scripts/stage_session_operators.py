@@ -3,6 +3,7 @@ import subprocess
 import stage_operators as staging
 import publish_session_clients as session
 
+session.verify_build_provenance()
 run = staging.api('actions/runs/' + str(session.RUN))
 assert run['head_sha'] == session.HEAD and run['status'] == 'completed' and run['conclusion'] == 'success'
 staging.ASSET_PLATFORM_ALIASES.update({p: p + '-credentials-ui-20261004' for p in ('windows-x64','macos-arm64','macos-x86_64')})

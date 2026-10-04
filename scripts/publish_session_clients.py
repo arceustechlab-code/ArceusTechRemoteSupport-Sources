@@ -4,8 +4,8 @@ import json
 import subprocess
 import publish_clients as publisher
 
-RUN = 37204249219
-HEAD = 'cfea17d703e2915087e390ce5e846ad67b243fd3'
+RUN = 37209126360
+HEAD = '368cf230b65256ebfd354fdd2dfdca72ac210364'
 TAG = 'v2026.10.04-credentials-ui-beta'
 
 def validate_session_source(archive, manifest, role='customer'):
@@ -19,7 +19,33 @@ def validate_session_source(archive, manifest, role='customer'):
 
 original_validate_source = publisher.validate_source
 
+
+def verify_build_provenance():
+    """Reuse five successful jobs; the sixth is rebuilt only for upload transport recovery."""
+    prior = publisher.api('actions/runs/37204249219')
+    assert prior['head_sha'] == 'cfea17d703e2915087e390ce5e846ad67b243fd3'
+    assert prior['status'] == 'completed' and prior['conclusion'] == 'failure'
+    jobs = publisher.api('actions/runs/37204249219/jobs?per_page=100')['jobs']
+    required = {'windows-x64 (customer)', 'windows-x64 (operator)', 'macos (customer, arm64)', 'macos (operator, arm64)', 'macos (operator, x86_64)'}
+    by_name = {job['name']: job for job in jobs}
+    assert required <= by_name.keys()
+    assert all(by_name[name]['conclusion'] == 'success' for name in required)
+    failed = [job for job in jobs if job['conclusion'] == 'failure']
+    assert len(failed) == 1 and failed[0]['name'] == 'macos (customer, x86_64)'
+    assert [s['name'] for s in failed[0]['steps'] if s['conclusion'] == 'failure'] == ['Save native packages to private draft only']
+    assert any(s['name'] == 'Verify normal GUI startup' and s['conclusion'] == 'success' for s in failed[0]['steps'])
+    new = publisher.api(f'actions/runs/{RUN}')
+    assert new['head_sha'] == HEAD and new['status'] == 'completed' and new['conclusion'] == 'success'
+    recovered = publisher.api(f'actions/runs/{RUN}/jobs?per_page=100')['jobs']
+    assert any(job['name'] == 'macos (customer, x86_64)' and job['conclusion'] == 'success' for job in recovered)
+    assert any(job['name'] == 'session-tests' and job['conclusion'] == 'success' for job in recovered)
+    for path in ['scripts/session-fix-manifest.json', 'scripts/apply_session_fix.py']:
+        original = publisher.api('contents/' + path + '?ref=cfea17d703e2915087e390ce5e846ad67b243fd3')
+        recovery = publisher.api('contents/' + path + '?ref=' + HEAD)
+        assert original['sha'] == recovery['sha'], 'Recovery must not change application sources'
+
 def configure():
+    verify_build_provenance()
     publisher.RUN = RUN
     publisher.EXPECTED_HEAD_SHA = HEAD
     publisher.PATCH_REVISION = HEAD
