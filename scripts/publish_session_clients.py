@@ -37,7 +37,7 @@ def verify_build_provenance():
     new = publisher.api(f'actions/runs/{RUN}')
     assert new['head_sha'] == HEAD and new['status'] == 'completed' and new['conclusion'] == 'success'
     recovered = publisher.api(f'actions/runs/{RUN}/jobs?per_page=100')['jobs']
-    assert any(job['name'] == 'macos (customer, x86_64)' and job['conclusion'] == 'success' for job in recovered)
+    assert any(job['name'].startswith('macos (customer, x86_64,') and job['conclusion'] == 'success' for job in recovered)
     assert any(job['name'] == 'session-tests' and job['conclusion'] == 'success' for job in recovered)
     for path in ['scripts/session-fix-manifest.json', 'scripts/apply_session_fix.py']:
         original = publisher.api('contents/' + path + '?ref=cfea17d703e2915087e390ce5e846ad67b243fd3')
