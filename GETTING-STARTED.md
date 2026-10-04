@@ -1,11 +1,11 @@
 # ArceusTech Remote Support — download e primo collegamento
 
-Aggiornamento del 4 ottobre: corretta la sincronizzazione dello stato dell'assistenza e della password cliente. Gli aggiornamenti con impostazioni vecchie non arrestano o riaprono la sessione e il controllo periodico non rigenera la password. Conservati password monouso e consenso locale. Test del controller e avvio GUI nei runner nativi superati; collaudo remoto completo dei nuovi pacchetti sui dispositivi reali ancora da eseguire. Windows non firmato e Mac con firma ad-hoc, senza notarizzazione.
+Aggiornamento del 4 ottobre: corretta la sincronizzazione dello stato dell'assistenza e della password cliente. Gli aggiornamenti con impostazioni vecchie non arrestano o riaprono la sessione e il controllo periodico non rigenera la password. Password stabile fino a Rigenera o chiusura dell’app, anche dopo un accesso, Stop/Start o perdita di rete. Consenso locale richiesto; operatore con ID e password prima della connessione e barra della sessione con icone e nomi leggibili. Test del controller e avvio GUI nei runner nativi superati; collaudo remoto completo dei nuovi pacchetti sui dispositivi reali ancora da eseguire. Windows non firmato e Mac con firma ad-hoc, senza notarizzazione.
 
 ## Download cliente
 
-- [Windows 64 bit](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-session-beta): installer EXE e ZIP portable.
-- [Mac Apple Silicon e Intel — pacchetti corretti](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-session-beta): DMG e app ZIP.
+- [Windows 64 bit](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-credentials-ui-beta): installer EXE e ZIP portable.
+- [Mac Apple Silicon e Intel — pacchetti corretti](https://github.com/arceustechlab-code/ArceusTechRemoteSupport-Sources/releases/tag/v2026.10.04-credentials-ui-beta): DMG e app ZIP.
 
 Logo aggiornato e server aziendale preconfigurato. Ogni release contiene sorgenti corrispondenti, avvisi OSS e checksum. I pacchetti operatore sono distribuiti separatamente dal titolare. Windows 32 bit è compilato, ma resta interno per la compatibilità Sciter/AGPL ancora da verificare.
 
@@ -27,7 +27,7 @@ Logo aggiornato e server aziendale preconfigurato. Ogni release contiene sorgent
 6. Verificare video, mouse, tastiera, clipboard, chat e trasferimento di un file di prova.
 7. Premere Termina assistenza dal cliente e verificare che controllo e video cessino. Provare una nuova sessione e il rifiuto della vecchia password.
 
-Il profilo cliente chiude l'accesso all'avvio: occorre premere Avvia assistenza. Prima dell'avvio appare Assistenza non avviata. Dopo Avvia attendere Pronto prima di copiare la password. Connessione al server prolungata indica un problema da verificare senza cambiare manualmente la configurazione aziendale. La richiesta della password segue il contatto iniziale con l'ID: l'accesso al desktop richiede autenticazione e consenso. La password monouso cambia dopo un accesso autorizzato.
+Il profilo cliente chiude l'accesso all'avvio: occorre premere Avvia assistenza. Prima dell'avvio appare Assistenza non avviata. Dopo Avvia attendere Pronto prima di copiare la password. Connessione al server prolungata indica un problema da verificare senza cambiare manualmente la configurazione aziendale. L’operatore inserisce ID e password prima di Connetti, poi il cliente accetta la richiesta sullo schermo. La password resta uguale fino a Rigenera o chiusura dell’app; Termina assistenza e Avvia non la cambiano. Rigenera chiude le connessioni esistenti.
 
 ## Verifiche e limiti
 
