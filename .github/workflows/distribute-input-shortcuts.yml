@@ -1,0 +1,41 @@
+name: Distribute verified movable panel and Mac shortcut packages
+on:
+  workflow_run:
+    workflows: ['Build movable panel and Mac keyboard shortcuts']
+    types: [completed]
+permissions:
+  contents: write
+  actions: read
+env:
+  GODEBUG: http2client=0
+jobs:
+  customer:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'd9194f86a526d3173f89db4a3181ccd9ff5f4b0e'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Verify sources, licenses, architecture and checksums then publish customer beta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/publish_input_clients.py
+      - name: Verify anonymous customer downloads and update links
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/verify_input_downloads.py
+  operator:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == 'd9194f86a526d3173f89db4a3181ccd9ff5f4b0e'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Verify operator sources and stage current packages in private draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/stage_input_operators.py
