@@ -52,7 +52,7 @@ jobs:
       working-directory: client/flutter
       run: flutter analyze --no-pub --no-fatal-infos --no-fatal-warnings lib/desktop/support lib/common.dart lib/desktop/pages/connection_page.dart
         lib/desktop/widgets/remote_toolbar.dart
-    - name: Verify credential entry, cancellation and toolbar labels
+    - name: Verify credential entry, cancellation and two-line toolbar labels
       working-directory: client/flutter
       run: flutter test --no-pub test/support_credentials_toolbar_test.dart
   windows-x64:
