@@ -1,0 +1,28 @@
+name: Stop superseded first session candidates
+on:
+  push:
+    paths: ['.github/workflows/cancel-superseded-session.yml']
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  stop-old:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify and cancel only the superseded first attempt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          repo = 'arceustechlab-code/ArceusTechRemoteSupport-Sources'
+          path = '/repos/' + repo + '/actions/runs/37163711827'
+          run = json.loads(subprocess.check_output(['gh','api',path],text=True))
+          assert run['head_sha'] == 'baf2d24e5f6081efe58b68daf4e387eab5d78f7d'
+          assert run['path'] == '.github/workflows/session-stability.yml'
+          if run['status'] != 'completed':
+              subprocess.run(['gh','api','--method','POST',path + '/cancel'],check=True)
+          print('Superseded build stopped or already completed; current complete revision untouched.')
+          PY
