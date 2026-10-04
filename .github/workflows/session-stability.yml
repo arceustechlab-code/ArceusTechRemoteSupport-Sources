@@ -119,7 +119,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CANDIDATE_ROLE: ${{ matrix.role }}
-        CANDIDATE_PLATFORM: windows-x64-sessionfix2-20261004
+        CANDIDATE_PLATFORM: windows-x64-sessionfix3-20261004
       run: python scripts/candidate_upload.py
     strategy:
       fail-fast: false
@@ -247,7 +247,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CANDIDATE_ROLE: ${{ matrix.role }}
-        CANDIDATE_PLATFORM: macos-${{ matrix.platform }}-sessionfix2-20261004
+        CANDIDATE_PLATFORM: macos-${{ matrix.platform }}-sessionfix3-20261004
       run: python scripts/candidate_upload.py
     permissions:
       contents: write

@@ -1,4 +1,4 @@
-name: Stop superseded first session candidates
+name: Stop superseded second session candidates
 on:
   push:
     paths: ['.github/workflows/cancel-superseded-session.yml']
@@ -18,9 +18,9 @@ jobs:
           python3 - <<'PY'
           import json, subprocess
           repo = 'arceustechlab-code/ArceusTechRemoteSupport-Sources'
-          path = '/repos/' + repo + '/actions/runs/37163711827'
+          path = '/repos/' + repo + '/actions/runs/37164075201'
           run = json.loads(subprocess.check_output(['gh','api',path],text=True))
-          assert run['head_sha'] == 'baf2d24e5f6081efe58b68daf4e387eab5d78f7d'
+          assert run['head_sha'] == '70f88b7528a807785501a3c51c55e4a4b44c6464'
           assert run['path'] == '.github/workflows/session-stability.yml'
           if run['status'] != 'completed':
               subprocess.run(['gh','api','--method','POST',path + '/cancel'],check=True)
