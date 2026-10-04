@@ -1,0 +1,37 @@
+name: Mark previous client betas superseded by session fix
+on:
+  push:
+    paths: ['.github/workflows/supersede-session-betas.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  notes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify new public beta and update only previous public customer notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          repo = 'arceustechlab-code/ArceusTechRemoteSupport-Sources'
+          def get(tag):
+              return json.loads(subprocess.check_output(['gh','api','/repos/' + repo + '/releases/tags/' + tag],text=True))
+          new = get('v2026.10.04-session-beta')
+          assert new['id'] == 402768652 and not new['draft'] and new['prerelease']
+          names = {a['name'] for a in new['assets']}
+          assert {'ArceusTechRemoteSupport-Setup.exe','ArceusTechRemoteSupport-macOS-arm64.dmg','ArceusTechRemoteSupport-macOS-x86_64.dmg','RELEASE-VERIFICATION.json','SHA256SUMS.txt'} <= names
+          prefix = 'VERSIONE SUPERATA: per la correzione della stabilità della sessione e della password cliente usare [la beta del 4 ottobre](https://github.com/' + repo + '/releases/tag/v2026.10.04-session-beta). Chiudere e sostituire la precedente app.\n\n'
+          for tag in ['v2026.10.03-windows-user-beta','v2026.10.03-mac-signfix-beta','v2026.10.03-client-beta-494d39c']:
+              old = get(tag)
+              assert not old['draft'] and old['prerelease']
+              body = old.get('body') or ''
+              if not body.startswith(prefix):
+                  path = Path(tag + '.md')
+                  path.write_text(prefix + body)
+                  subprocess.run(['gh','release','edit',tag,'--repo',repo,'--notes-file',str(path)],check=True)
+              print('Previous public customer beta directs to current verified release:', tag)
+          PY
