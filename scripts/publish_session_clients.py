@@ -4,8 +4,8 @@ import json
 import subprocess
 import publish_clients as publisher
 
-RUN = 37163711827
-HEAD = 'baf2d24e5f6081efe58b68daf4e387eab5d78f7d'
+RUN = 37164075201
+HEAD = '70f88b7528a807785501a3c51c55e4a4b44c6464'
 TAG = 'v2026.10.04-session-beta'
 
 def validate_session_source(archive, manifest, role='customer'):
@@ -28,7 +28,7 @@ def configure():
         'macos-arm64': ('ArceusTechRemoteSupport', ['-macOS-arm64.dmg', '-macOS-arm64.app.zip'], '-macOS-arm64-source.tar.gz'),
         'macos-x86_64': ('ArceusTechRemoteSupport', ['-macOS-x86_64.dmg', '-macOS-x86_64.app.zip'], '-macOS-x86_64-source.tar.gz'),
     }
-    publisher.ASSET_PLATFORM_ALIASES.update({platform: platform + '-sessionfix-20261004' for platform in publisher.PLATFORMS})
+    publisher.ASSET_PLATFORM_ALIASES.update({platform: platform + '-sessionfix2-20261004' for platform in publisher.PLATFORMS})
     publisher.TAG = TAG
     publisher.validate_source = validate_session_source
 
